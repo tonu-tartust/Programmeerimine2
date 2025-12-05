@@ -1,44 +1,42 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using KooliProjekt.Application.Data;
-using KooliProjekt.Application.Infrastructure.Paging;
+using KooliProjekt.Application.Data.Repositories;
 using KooliProjekt.Application.Infrastructure.Results;
 using MediatR;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace KooliProjekt.Application.Features.ToDoLists
+namespace KooliProjekt.Application.Features.Task
 {
+    // Kasutab ITaskRepositoryt
     public class SaveTasksCommandHandler : IRequestHandler<SaveTasksCommand, OperationResult>
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly ITaskRepository _taskRepository;
 
-        public SaveTasksCommandHandler(ApplicationDbContext dbContext)
+        public SaveTasksCommandHandler(ITaskRepository taskRepository)
         {
-            _dbContext = dbContext;
+            _taskRepository = taskRepository;
         }
 
         public async Task<OperationResult> Handle(SaveTasksCommand request, CancellationToken cancellationToken)
         {
             var result = new OperationResult();
 
-            var list = new Tasks();
-            if (request.Id == 0)
+            var task = new Tasks();
+            if (request.Id != 0)
             {
-                await _dbContext.Taskss.AddAsync(list);
-            }
-            else
-            {
-                list = await _dbContext.Taskss.FindAsync(request.Id);
-                //_dbContext.ToDoLists.Update(list);
+                task = await _taskRepository.GetByIdAsync(request.Id);
             }
 
-            list.Id = request.Id;
+            task.ProjectId = request.ProjectId;
+            task.Title = request.Title;
+            task.Description = request.Description;
+            task.AssignedTo = request.AssignedTo;
+            task.StartDate = request.StartDate;
+            task.DueDate = request.DueDate;
+            task.Status = request.Status;
+            task.Priority = request.Priority;
 
-            await _dbContext.SaveChangesAsync();
+            await _taskRepository.SaveAsync(task);
 
             return result;
         }

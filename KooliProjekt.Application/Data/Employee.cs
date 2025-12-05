@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace KooliProjekt.Application.Data
 {
-    public class Employee
+    public class Employee : Entity
     {
         [Key]
         [Required]

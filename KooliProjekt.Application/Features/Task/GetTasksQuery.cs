@@ -1,7 +1,7 @@
 ﻿using KooliProjekt.Application.Infrastructure.Results;
 using MediatR;
 
-namespace KooliProjekt.Application.Features.ToDoLists
+namespace KooliProjekt.Application.Features.Task
 {
     public class GetTasksQuery : IRequest<OperationResult<object>>
     {

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace KooliProjekt.Application.Data
 {
-    public class ProjectMember
+    public class ProjectMember : Entity
     {
         [Key]
         [Required]

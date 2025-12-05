@@ -1,44 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using KooliProjekt.Application.Data;
-using KooliProjekt.Application.Infrastructure.Paging;
+using KooliProjekt.Application.Data.Repositories;
 using KooliProjekt.Application.Infrastructure.Results;
 using MediatR;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace KooliProjekt.Application.Features.ToDoLists
+namespace KooliProjekt.Application.Features.Employees
 {
+    // Kasutab IEmployeeRepositoryt
     public class SaveEmployeesCommandHandler : IRequestHandler<SaveEmployeesCommand, OperationResult>
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IEmployeeRepository _employeeRepository;
 
-        public SaveEmployeesCommandHandler(ApplicationDbContext dbContext)
+        public SaveEmployeesCommandHandler(IEmployeeRepository employeeRepository)
         {
-            _dbContext = dbContext;
+            _employeeRepository = employeeRepository;
         }
 
         public async Task<OperationResult> Handle(SaveEmployeesCommand request, CancellationToken cancellationToken)
         {
             var result = new OperationResult();
 
-            var list = new Employee();
-            if (request.Id == 0)
+            var employee = new Employee();
+            if (request.Id != 0)
             {
-                await _dbContext.Employees.AddAsync(list);
-            }
-            else
-            {
-                list = await _dbContext.Employees.FindAsync(request.Id);
-                //_dbContext.ToDoLists.Update(list);
+                employee = await _employeeRepository.GetByIdAsync(request.Id);
             }
 
-            list.Id = request.Id;
+            employee.FirstName = request.FirstName;
+            employee.LastName = request.LastName;
+            employee.Email = request.Email;
+            employee.Phone = request.Phone;
+            employee.Role = request.Role;
 
-            await _dbContext.SaveChangesAsync();
+            await _employeeRepository.SaveAsync(employee);
 
             return result;
         }

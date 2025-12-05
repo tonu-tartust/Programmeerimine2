@@ -1,36 +1,39 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using KooliProjekt.Application.Data;
+using KooliProjekt.Application.Data.Repositories;
 using KooliProjekt.Application.Infrastructure.Results;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
-namespace KooliProjekt.Application.Features.ToDoLists
+namespace KooliProjekt.Application.Features.Task
 {
+    // Kasutab ITaskRepositoryt
     public class GetTasksQueryHandler : IRequestHandler<GetTasksQuery, OperationResult<object>>
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly ITaskRepository _taskRepository;
 
-        public GetTasksQueryHandler(ApplicationDbContext dbContext)
+        public GetTasksQueryHandler(ITaskRepository taskRepository)
         {
-            _dbContext = dbContext;
+            _taskRepository = taskRepository;
         }
 
         public async Task<OperationResult<object>> Handle(GetTasksQuery request, CancellationToken cancellationToken)
         {
             var result = new OperationResult<object>();
+            var task = await _taskRepository.GetByIdAsync(request.Id);
 
-            result.Value = await _dbContext
-                .Taskss
-                .Include(list => list.Id)
-                .Where(list => list.Id == request.Id)
-                .Select(list => new
-                {
-                    Id = list.Id,
-                })
-                .FirstOrDefaultAsync();
+            result.Value = new
+            {
+                Id = task.Id,
+                ProjectId = task.ProjectId,
+                Title = task.Title,
+                Description = task.Description,
+                AssignedTo = task.AssignedTo,
+                StartDate = task.StartDate,
+                DueDate = task.DueDate,
+                Status = task.Status,
+                Priority = task.Priority
+            };
 
             return result;
         }

@@ -1,36 +1,36 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using KooliProjekt.Application.Data;
+using KooliProjekt.Application.Data.Repositories;
 using KooliProjekt.Application.Infrastructure.Results;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
-namespace KooliProjekt.Application.Features.ToDoLists
+namespace KooliProjekt.Application.Features.Employees
 {
+    // Kasutab IEmployeeRepositoryt
     public class GetEmployeesQueryHandler : IRequestHandler<GetEmployeesQuery, OperationResult<object>>
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IEmployeeRepository _employeeRepository;
 
-        public GetEmployeesQueryHandler(ApplicationDbContext dbContext)
+        public GetEmployeesQueryHandler(IEmployeeRepository employeeRepository)
         {
-            _dbContext = dbContext;
+            _employeeRepository = employeeRepository;
         }
 
         public async Task<OperationResult<object>> Handle(GetEmployeesQuery request, CancellationToken cancellationToken)
         {
             var result = new OperationResult<object>();
+            var employee = await _employeeRepository.GetByIdAsync(request.Id);
 
-            result.Value = await _dbContext
-                .Employees
-                .Include(list => list.Id)
-                .Where(list => list.Id == request.Id)
-                .Select(list => new
-                {
-                    Id = list.Id,
-                })
-                .FirstOrDefaultAsync();
+            result.Value = new
+            {
+                Id = employee.Id,
+                FirstName = employee.FirstName,
+                LastName = employee.LastName,
+                Email = employee.Email,
+                Phone = employee.Phone,
+                Role = employee.Role
+            };
 
             return result;
         }

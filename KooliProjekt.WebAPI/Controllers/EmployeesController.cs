@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using KooliProjekt.Application.Features.Employees;
-using KooliProjekt.Application.Features.ToDoLists;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -39,6 +38,16 @@ namespace KooliProjekt.WebAPI.Controllers
         [Route("Save")]
         public async Task<IActionResult> Save(SaveEmployeesCommand command)
         {
+            var response = await _mediator.Send(command);
+
+            return Result(response);
+        }
+
+        [HttpDelete]
+        [Route("Delete")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var command = new DeleteEmployeeCommand { Id = id };
             var response = await _mediator.Send(command);
 
             return Result(response);

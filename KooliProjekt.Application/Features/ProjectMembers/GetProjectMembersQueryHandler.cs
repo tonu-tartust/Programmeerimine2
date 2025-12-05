@@ -1,36 +1,34 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using KooliProjekt.Application.Data;
+using KooliProjekt.Application.Data.Repositories;
 using KooliProjekt.Application.Infrastructure.Results;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
-namespace KooliProjekt.Application.Features.ToDoLists
+namespace KooliProjekt.Application.Features.ProjectMembers
 {
+    // Kasutab IProjectMemberRepositoryt
     public class GetProjectMembersQueryHandler : IRequestHandler<GetProjectMembersQuery, OperationResult<object>>
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IProjectMemberRepository _projectMemberRepository;
 
-        public GetProjectMembersQueryHandler(ApplicationDbContext dbContext)
+        public GetProjectMembersQueryHandler(IProjectMemberRepository projectMemberRepository)
         {
-            _dbContext = dbContext;
+            _projectMemberRepository = projectMemberRepository;
         }
 
         public async Task<OperationResult<object>> Handle(GetProjectMembersQuery request, CancellationToken cancellationToken)
         {
             var result = new OperationResult<object>();
+            var projectMember = await _projectMemberRepository.GetByIdAsync(request.Id);
 
-            result.Value = await _dbContext
-                .ProjectMembers
-                .Include(list => list.Id)
-                .Where(list => list.Id == request.Id)
-                .Select(list => new
-                {
-                    Id = list.Id,
-                })
-                .FirstOrDefaultAsync();
+            result.Value = new
+            {
+                Id = projectMember.Id,
+                ProjectId = projectMember.ProjectId,
+                EmployeeId = projectMember.EmployeeId,
+                RoleInProject = projectMember.RoleInProject
+            };
 
             return result;
         }

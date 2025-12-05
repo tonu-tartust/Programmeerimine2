@@ -1,44 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using KooliProjekt.Application.Data;
-using KooliProjekt.Application.Infrastructure.Paging;
+using KooliProjekt.Application.Data.Repositories;
 using KooliProjekt.Application.Infrastructure.Results;
 using MediatR;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace KooliProjekt.Application.Features.ToDoLists
+namespace KooliProjekt.Application.Features.Projects
 {
+    // Kasutab IProjectRepositoryt
     public class SaveProjectsCommandHandler : IRequestHandler<SaveProjectsCommand, OperationResult>
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IProjectRepository _projectRepository;
 
-        public SaveProjectsCommandHandler(ApplicationDbContext dbContext)
+        public SaveProjectsCommandHandler(IProjectRepository projectRepository)
         {
-            _dbContext = dbContext;
+            _projectRepository = projectRepository;
         }
 
         public async Task<OperationResult> Handle(SaveProjectsCommand request, CancellationToken cancellationToken)
         {
             var result = new OperationResult();
 
-            var list = new Project();
-            if (request.Id == 0)
+            var project = new Project();
+            if (request.Id != 0)
             {
-                await _dbContext.Projects.AddAsync(list);
-            }
-            else
-            {
-                list = await _dbContext.Projects.FindAsync(request.Id);
-                //_dbContext.ToDoLists.Update(list);
+                project = await _projectRepository.GetByIdAsync(request.Id);
             }
 
-            list.Id = request.Id;
+            project.Name = request.Name;
+            project.Description = request.Description;
+            project.StartDate = request.StartDate;
+            project.EndDate = request.EndDate;
+            project.Status = request.Status;
+            project.Budget = request.Budget;
 
-            await _dbContext.SaveChangesAsync();
+            await _projectRepository.SaveAsync(project);
 
             return result;
         }
