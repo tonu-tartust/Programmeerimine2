@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KooliProjekt.Application.UnitTests
 {
-    public abstract class ServiceTestBase : IDisposable
+    public abstract class TestBase : IDisposable
     {
         private ApplicationDbContext _dbContext;
         private bool disposedValue;
@@ -25,6 +25,7 @@ namespace KooliProjekt.Application.UnitTests
             }
         }
 
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
@@ -42,6 +43,13 @@ namespace KooliProjekt.Application.UnitTests
         {
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
+        }
+        protected ApplicationDbContext GetFaultyDbContext()
+        {
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>();
+            var dbContext = new ApplicationDbContext(options.Options);
+
+            return dbContext;
         }
     }
 }
