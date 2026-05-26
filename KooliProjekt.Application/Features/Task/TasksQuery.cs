@@ -8,6 +8,7 @@ namespace KooliProjekt.Application.Features.Task
 {
     public class TasksQuery : IRequest<OperationResult<PagedResult<Tasks>>>
     {
+        public string Keyword { get; set; }
         public int Page { get; set; }
         public int PageSize { get; set; }
     }

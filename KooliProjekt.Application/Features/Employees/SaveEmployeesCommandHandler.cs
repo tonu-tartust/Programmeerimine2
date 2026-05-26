@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using KooliProjekt.Application.Data;
 using KooliProjekt.Application.Data.Repositories;
@@ -14,17 +15,27 @@ namespace KooliProjekt.Application.Features.Employees
 
         public SaveEmployeesCommandHandler(IEmployeeRepository employeeRepository)
         {
-            _employeeRepository = employeeRepository;
+            _employeeRepository = employeeRepository ?? throw new ArgumentNullException(nameof(employeeRepository));
         }
 
         public async Task<OperationResult> Handle(SaveEmployeesCommand request, CancellationToken cancellationToken)
         {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
             var result = new OperationResult();
 
             var employee = new Employee();
             if (request.Id != 0)
             {
                 employee = await _employeeRepository.GetByIdAsync(request.Id);
+                if (employee == null)
+                {
+                    result.AddError("Not found");
+                    return result;
+                }
             }
 
             employee.FirstName = request.FirstName;

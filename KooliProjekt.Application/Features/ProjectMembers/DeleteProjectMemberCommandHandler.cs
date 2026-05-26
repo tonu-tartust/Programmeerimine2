@@ -16,17 +16,29 @@ namespace KooliProjekt.Application.Features.ProjectMembers
 
         public DeleteProjectMemberCommandHandler(ApplicationDbContext dbContext)
         {
-            _dbContext = dbContext;
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
         public async Task<OperationResult> Handle(DeleteProjectMemberCommand request, CancellationToken cancellationToken)
         {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
             var result = new OperationResult();
 
-            await _dbContext
-                .ProjectMembers
-                .Where(pm => pm.Id == request.Id)
-                .ExecuteDeleteAsync();
+            if (request.Id <= 0)
+            {
+                return result;
+            }
+
+            var pm = await _dbContext.ProjectMembers.FindAsync(new object[] { request.Id }, cancellationToken);
+            if (pm != null)
+            {
+                _dbContext.ProjectMembers.Remove(pm);
+                await _dbContext.SaveChangesAsync(cancellationToken);
+            }
 
             return result;
         }

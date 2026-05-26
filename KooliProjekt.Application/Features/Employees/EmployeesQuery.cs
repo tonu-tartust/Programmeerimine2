@@ -8,6 +8,7 @@ namespace KooliProjekt.Application.Features.Employees
 {
     public class EmployeesQuery : IRequest<OperationResult<PagedResult<Employee>>>
     {
+        public string Keyword { get; set; }
         public int Page { get; set; }
         public int PageSize { get; set; }
     }

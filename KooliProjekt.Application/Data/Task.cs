@@ -10,10 +10,6 @@ namespace KooliProjekt.Application.Data
 {
     public class Tasks : Entity
     {
-        [Key]
-        [Required]
-        [Unicode]
-        public int Id { get; set; }
         [Required]
         public int ProjectId { get; set; }
         [Required]

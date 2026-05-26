@@ -11,10 +11,6 @@ namespace KooliProjekt.Application.Data
 {
     public class ProjectMember : Entity
     {
-        [Key]
-        [Required]
-        [Unicode]
-        public int Id { get; set; }
         [Required]
         public int ProjectId { get; set; }
         [Required]

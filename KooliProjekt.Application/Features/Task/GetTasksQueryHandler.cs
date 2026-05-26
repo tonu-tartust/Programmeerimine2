@@ -1,26 +1,41 @@
-﻿using System.Threading;
+using System.Threading;
 using System.Threading.Tasks;
 using KooliProjekt.Application.Data;
-using KooliProjekt.Application.Data.Repositories;
+using TaskEntity = KooliProjekt.Application.Data.Tasks;
 using KooliProjekt.Application.Infrastructure.Results;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace KooliProjekt.Application.Features.Task
 {
-    // Kasutab ITaskRepositoryt
     public class GetTasksQueryHandler : IRequestHandler<GetTasksQuery, OperationResult<object>>
     {
-        private readonly ITaskRepository _taskRepository;
+        private readonly ApplicationDbContext _dbContext;
 
-        public GetTasksQueryHandler(ITaskRepository taskRepository)
+        public GetTasksQueryHandler(ApplicationDbContext dbContext)
         {
-            _taskRepository = taskRepository;
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
         public async Task<OperationResult<object>> Handle(GetTasksQuery request, CancellationToken cancellationToken)
         {
             var result = new OperationResult<object>();
-            var task = await _taskRepository.GetByIdAsync(request.Id);
+
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            if (request.Id <= 0)
+            {
+                return result;
+            }
+
+            var task = await _dbContext.Set<TaskEntity>().FirstOrDefaultAsync(t => t.Id == request.Id, cancellationToken);
+
+            if (task == null)
+            {
+                return result;
+            }
 
             result.Value = new
             {

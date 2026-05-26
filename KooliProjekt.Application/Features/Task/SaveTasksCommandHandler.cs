@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using KooliProjekt.Application.Data;
 using KooliProjekt.Application.Data.Repositories;
@@ -14,17 +15,27 @@ namespace KooliProjekt.Application.Features.Task
 
         public SaveTasksCommandHandler(ITaskRepository taskRepository)
         {
-            _taskRepository = taskRepository;
+            _taskRepository = taskRepository ?? throw new ArgumentNullException(nameof(taskRepository));
         }
 
         public async Task<OperationResult> Handle(SaveTasksCommand request, CancellationToken cancellationToken)
         {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
             var result = new OperationResult();
 
             var task = new Tasks();
             if (request.Id != 0)
             {
                 task = await _taskRepository.GetByIdAsync(request.Id);
+                if (task == null)
+                {
+                    result.AddError("Not found");
+                    return result;
+                }
             }
 
             task.ProjectId = request.ProjectId;

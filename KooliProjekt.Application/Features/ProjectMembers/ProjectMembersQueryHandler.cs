@@ -22,9 +22,37 @@ namespace KooliProjekt.Application.Features.ProjectMembers
 
         public async Task<OperationResult<PagedResult<ProjectMember>>> Handle(ProjectMembersQuery request, CancellationToken cancellationToken)
         {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            if (request.Page <= 0)
+            {
+                throw new ArgumentException("Page must be greater than zero.", nameof(request.Page));
+            }
+
+            if (request.PageSize <= 0)
+            {
+                throw new ArgumentException("PageSize must be greater than zero.", nameof(request.PageSize));
+            }
+
+            if (request.PageSize > 100)
+            {
+                throw new ArgumentException("PageSize cannot be greater than 100.", nameof(request.PageSize));
+            }
+
             var result = new OperationResult<PagedResult<ProjectMember>>();
-            result.Value = await _dbContext
-                .ProjectMembers
+
+            var query = _dbContext.ProjectMembers.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(request.Keyword))
+            {
+                var keyword = request.Keyword.Trim();
+                query = query.Where(x => x.RoleInProject.Contains(keyword));
+            }
+
+            result.Value = await query
                 .OrderBy(list => list.Id)
                 .GetPagedAsync(request.Page, request.PageSize);
 

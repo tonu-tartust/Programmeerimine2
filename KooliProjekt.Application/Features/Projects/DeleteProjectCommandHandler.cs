@@ -16,28 +16,38 @@ namespace KooliProjekt.Application.Features.Projects
 
         public DeleteProjectCommandHandler(ApplicationDbContext dbContext)
         {
-            _dbContext = dbContext;
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
         public async Task<OperationResult> Handle(DeleteProjectCommand request, CancellationToken cancellationToken)
         {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
             var result = new OperationResult();
 
+            if (request.Id <= 0)
+            {
+                return result;
+            }
+
+            var project = await _dbContext.Projects.FindAsync(new object[] { request.Id }, cancellationToken);
+            if (project == null)
+            {
+                return result;
+            }
+
             // Kustuta kõigepealt seotud Tasks ja ProjectMembers
-            await _dbContext
-                .Taskss
-                .Where(t => t.ProjectId == request.Id)
-                .ExecuteDeleteAsync();
+            var tasks = await _dbContext.Taskss.Where(t => t.ProjectId == request.Id).ToListAsync(cancellationToken);
+            _dbContext.Taskss.RemoveRange(tasks);
 
-            await _dbContext
-                .ProjectMembers
-                .Where(pm => pm.ProjectId == request.Id)
-                .ExecuteDeleteAsync();
+            var members = await _dbContext.ProjectMembers.Where(pm => pm.ProjectId == request.Id).ToListAsync(cancellationToken);
+            _dbContext.ProjectMembers.RemoveRange(members);
 
-            await _dbContext
-                .Projects
-                .Where(p => p.Id == request.Id)
-                .ExecuteDeleteAsync();
+            _dbContext.Projects.Remove(project);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             return result;
         }

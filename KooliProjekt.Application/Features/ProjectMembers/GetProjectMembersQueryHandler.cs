@@ -1,26 +1,40 @@
-﻿using System.Threading;
+using System.Threading;
 using System.Threading.Tasks;
 using KooliProjekt.Application.Data;
-using KooliProjekt.Application.Data.Repositories;
 using KooliProjekt.Application.Infrastructure.Results;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace KooliProjekt.Application.Features.ProjectMembers
 {
-    // Kasutab IProjectMemberRepositoryt
     public class GetProjectMembersQueryHandler : IRequestHandler<GetProjectMembersQuery, OperationResult<object>>
     {
-        private readonly IProjectMemberRepository _projectMemberRepository;
+        private readonly ApplicationDbContext _dbContext;
 
-        public GetProjectMembersQueryHandler(IProjectMemberRepository projectMemberRepository)
+        public GetProjectMembersQueryHandler(ApplicationDbContext dbContext)
         {
-            _projectMemberRepository = projectMemberRepository;
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
         public async Task<OperationResult<object>> Handle(GetProjectMembersQuery request, CancellationToken cancellationToken)
         {
             var result = new OperationResult<object>();
-            var projectMember = await _projectMemberRepository.GetByIdAsync(request.Id);
+
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            if (request.Id <= 0)
+            {
+                return result;
+            }
+
+            var projectMember = await _dbContext.ProjectMembers.FirstOrDefaultAsync(pm => pm.Id == request.Id, cancellationToken); // Note: Should be pm.Id
+
+            if (projectMember == null)
+            {
+                return result;
+            }
 
             result.Value = new
             {

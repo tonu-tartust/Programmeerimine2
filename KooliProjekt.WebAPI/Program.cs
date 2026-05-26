@@ -30,6 +30,17 @@ namespace KooliProjekt.WebAPI
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("dev-cors", policy =>
+                {
+                    policy
+                        .AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
+
             var applicationAssembly = typeof(ErrorHandlingBehavior<,>).Assembly;
             builder.Services.AddValidatorsFromAssembly(applicationAssembly);
             builder.Services.AddMediatR(config =>
@@ -55,6 +66,8 @@ namespace KooliProjekt.WebAPI
                 app.UseSwaggerUI();
             }
 
+            app.UseCors("dev-cors");
+
             app.UseAuthorization();
             app.MapControllers();
 
@@ -62,7 +75,7 @@ namespace KooliProjekt.WebAPI
             // ja genereeri andmed
             using (var scope = app.Services.CreateScope())
             using (var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>())
-            {                   
+            {
                 dbContext.Database.Migrate();
 
                 // Preprotsessori direktiiv, mis tagab, et andmete genereerimine

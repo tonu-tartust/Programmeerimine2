@@ -8,6 +8,7 @@ namespace KooliProjekt.Application.Features.ProjectMembers
 {
     public class ProjectMembersQuery : IRequest<OperationResult<PagedResult<ProjectMember>>>
     {
+        public string Keyword { get; set; }
         public int Page { get; set; }
         public int PageSize { get; set; }
     }

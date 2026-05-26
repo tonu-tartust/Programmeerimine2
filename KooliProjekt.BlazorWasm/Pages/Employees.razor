@@ -1,0 +1,66 @@
+@page "/employees"
+@inject IApiClient apiClient
+
+<PageTitle>Employees</PageTitle>
+
+<h1>Employees</h1>
+
+@if (employees == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <p><a class="btn btn-primary" href="/create">Add new</a></p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>FirstName</th>
+                <th>LastName</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Role</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var employee in employees)
+            {
+                <tr>
+                    <td>@employee.Id</td>
+                    <td>@employee.FirstName</td>
+                    <td>@employee.LastName</td>
+                    <td>@employee.Email</td>
+                    <td>@employee.Phone</td>
+                    <td>@employee.Role</td>
+                    <td>
+                        <a class="btn btn-success" href="/edit/@employee.Id">Edit</a>
+                        <button class="btn btn-danger" @onclick="() => Delete(employee.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IList<Employee> employees;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        var result = await apiClient.List(1, 100);
+        employees = result.Value.Results;
+    }
+
+    private async Task Delete(int id)
+    {
+        await apiClient.Delete(id);
+        await LoadData();
+    }
+}

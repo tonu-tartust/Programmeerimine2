@@ -1,26 +1,40 @@
-﻿using System.Threading;
+using System.Threading;
 using System.Threading.Tasks;
 using KooliProjekt.Application.Data;
-using KooliProjekt.Application.Data.Repositories;
 using KooliProjekt.Application.Infrastructure.Results;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace KooliProjekt.Application.Features.Employees
 {
-    // Kasutab IEmployeeRepositoryt
     public class GetEmployeesQueryHandler : IRequestHandler<GetEmployeesQuery, OperationResult<object>>
     {
-        private readonly IEmployeeRepository _employeeRepository;
+        private readonly ApplicationDbContext _dbContext;
 
-        public GetEmployeesQueryHandler(IEmployeeRepository employeeRepository)
+        public GetEmployeesQueryHandler(ApplicationDbContext dbContext)
         {
-            _employeeRepository = employeeRepository;
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
         public async Task<OperationResult<object>> Handle(GetEmployeesQuery request, CancellationToken cancellationToken)
         {
             var result = new OperationResult<object>();
-            var employee = await _employeeRepository.GetByIdAsync(request.Id);
+
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            if (request.Id <= 0)
+            {
+                return result;
+            }
+
+            var employee = await _dbContext.Employees.FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
+
+            if (employee == null)
+            {
+                return result;
+            }
 
             result.Value = new
             {

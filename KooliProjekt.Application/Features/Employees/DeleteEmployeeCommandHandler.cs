@@ -16,17 +16,29 @@ namespace KooliProjekt.Application.Features.Employees
 
         public DeleteEmployeeCommandHandler(ApplicationDbContext dbContext)
         {
-            _dbContext = dbContext;
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
         public async Task<OperationResult> Handle(DeleteEmployeeCommand request, CancellationToken cancellationToken)
         {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
             var result = new OperationResult();
 
-            await _dbContext
-                .Employees
-                .Where(e => e.Id == request.Id)
-                .ExecuteDeleteAsync();
+            if (request.Id <= 0)
+            {
+                return result;
+            }
+
+            var employee = await _dbContext.Employees.FindAsync(new object[] { request.Id }, cancellationToken);
+            if (employee != null)
+            {
+                _dbContext.Employees.Remove(employee);
+                await _dbContext.SaveChangesAsync(cancellationToken);
+            }
 
             return result;
         }

@@ -1,5 +1,5 @@
 dotnet tool install -g dotnet-reportgenerator-globaltool
-$TestOutput = dotnet test --collect "XPlat Code Coverage" --results-directory ./BuildReports/UnitTests
+$TestOutput = dotnet test --settings coverlet.runsettings --collect "XPlat Code Coverage" --results-directory ./BuildReports/UnitTests
 $TestReportsParts = $TestOutput | Select-String coverage.cobertura.xml | ForEach-Object { $_.Line.Trim() }
 $TestReportsCrappy = ($TestReportsParts -join ';')
 

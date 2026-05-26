@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat code coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <Exclude>
+            [KooliProjekt.Application]KooliProjekt.Application.Behaviors.*,
+            [KooliProjekt.Application]KooliProjekt.Application.Data.*,
+            [KooliProjekt.Application]KooliProjekt.Application.DTO.*,
+            [KooliProjekt.Application]KooliProjekt.Application.Infrastructure.*,
+            [KooliProjekt.Application]KooliProjekt.Application.Migrations.*,
+            [KooliProjekt.Application]*.*Command,
+            [KooliProjekt.Application]*.*Query
+          </Exclude>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>
